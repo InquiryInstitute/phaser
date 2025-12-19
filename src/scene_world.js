@@ -245,7 +245,8 @@ export default class WorldScene extends Phaser.Scene {
             method: "POST",
             headers: { 
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${config.supabaseAnonKey}`
+              "Authorization": `Bearer ${config.supabaseAnonKey}`,
+              "apikey": config.supabaseAnonKey
             },
             body: JSON.stringify({
               personaId: faculty.id,
