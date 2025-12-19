@@ -24,7 +24,15 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   create() {
+    console.log("Creating world scene...");
     const map = this.make.tilemap({ key: "campus" });
+    
+    if (!map) {
+      console.error("Map 'campus' not loaded!");
+      return;
+    }
+    
+    console.log("Map loaded:", map.width, "x", map.height, "tiles");
 
     // Match the tileset name in Tiled exactly
     const tileset = map.addTilesetImage("tiles", "tiles");
@@ -33,6 +41,8 @@ export default class WorldScene extends Phaser.Scene {
       console.error("Tileset not found! Make sure the tileset name in Tiled matches 'tiles'");
       return;
     }
+    
+    console.log("Tileset loaded:", tileset.name);
 
     // Create layers
     const ground = map.createLayer("Ground", tileset, 0, 0);
@@ -40,23 +50,34 @@ export default class WorldScene extends Phaser.Scene {
 
     if (!ground) {
       console.warn("Ground layer not found. Make sure you have a layer named 'Ground' in Tiled.");
+    } else {
+      console.log("Ground layer created");
+      ground.setVisible(true);
     }
 
     if (!walls) {
       console.warn("Walls layer not found. Make sure you have a layer named 'Walls' in Tiled.");
     } else {
+      console.log("Walls layer created");
       walls.setCollisionByExclusion([-1]);
+      walls.setVisible(true);
     }
 
     // Create player avatar
     const startX = map.widthInPixels / 2 || 64;
     const startY = map.heightInPixels / 2 || 64;
     
+    console.log("Creating player at:", startX, startY);
+    console.log("Map dimensions:", map.widthInPixels, "x", map.heightInPixels);
+    
     this.player = this.physics.add.sprite(startX, startY, "player");
     this.player.setDisplaySize(18, 18);
     this.player.setTint(0x667eea); // Purple color for visibility
+    this.player.setVisible(true);
     this.player.body.setSize(18, 18);
     this.player.setCollideWorldBounds(true);
+    
+    console.log("Player created:", this.player.x, this.player.y);
 
     // Camera follows player smoothly
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
