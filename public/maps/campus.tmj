@@ -157,8 +157,17 @@
  "tileheight":32,
  "tilesets":[
         {
+         "columns":8,
          "firstgid":1,
-         "source":"tiles.tsj"
+         "image":"tiles.png",
+         "imageheight":256,
+         "imagewidth":256,
+         "margin":0,
+         "name":"tiles",
+         "spacing":0,
+         "tilecount":64,
+         "tileheight":32,
+         "tilewidth":32
         }
  ],
  "tilewidth":32,
