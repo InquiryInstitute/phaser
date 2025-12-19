@@ -175,6 +175,287 @@
         .info li {
             margin: 5px 0;
         }
+        
+        /* Patronage Lantern - Bottom Left */
+        .lantern-container {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 50;
+        }
+        
+        .lantern-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #f59e0b;
+            border: none;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .lantern-btn:hover {
+            background: #d97706;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .lantern-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .lantern-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 4px;
+            background: white;
+            color: #f59e0b;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .lantern-panel {
+            position: absolute;
+            bottom: 64px;
+            left: 0;
+            width: 320px;
+            max-height: 80vh;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .lantern-panel.open {
+            display: block;
+        }
+        
+        .panel-header {
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .panel-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0f172a;
+            margin: 0;
+        }
+        
+        .panel-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .panel-close:hover {
+            color: #475569;
+        }
+        
+        .panel-content {
+            max-height: 384px;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .panel-empty {
+            text-align: center;
+            padding: 32px 16px;
+        }
+        
+        .panel-empty svg {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            color: #cbd5e1;
+        }
+        
+        .panel-empty p {
+            font-size: 14px;
+            font-weight: 500;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+        
+        .panel-empty .subtitle {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        
+        .panel-cta {
+            display: inline-block;
+            background: #f59e0b;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.2s;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .panel-cta:hover {
+            background: #d97706;
+        }
+        
+        /* Feedback Candle - Bottom Right */
+        .candle-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 50;
+        }
+        
+        .candle-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #6366f1;
+            border: none;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .candle-btn:hover {
+            background: #4f46e5;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .candle-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .candle-panel {
+            position: absolute;
+            bottom: 64px;
+            right: 0;
+            width: 384px;
+            max-height: 80vh;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .candle-panel.open {
+            display: flex;
+        }
+        
+        .panel-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.2);
+            z-index: 40;
+            display: none;
+        }
+        
+        .panel-backdrop.open {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            color: #0f172a;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            ring: 2px;
+            ring-color: #6366f1;
+            border-color: #6366f1;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            color: #0f172a;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-textarea:focus {
+            outline: none;
+            ring: 2px;
+            ring-color: #6366f1;
+            border-color: #6366f1;
+        }
+        
+        .form-submit {
+            width: 100%;
+            background: #6366f1;
+            color: white;
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-submit:hover:not(:disabled) {
+            background: #4f46e5;
+        }
+        
+        .form-submit:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -219,7 +500,156 @@
         </div>
     </div>
     
+    <!-- Patronage Lantern -->
+    <div class="lantern-container">
+        <button class="lantern-btn" id="lantern-btn" aria-label="View patrons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v4M12 18v4M8 6h8M8 18h8" />
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+                <path d="M12 8v4M10 10h4" />
+            </svg>
+            <span class="lantern-badge" id="lantern-badge" style="display: none;">0</span>
+        </button>
+        <div class="lantern-panel" id="lantern-panel">
+            <div class="panel-header">
+                <h3>Patrons</h3>
+                <button class="panel-close" id="lantern-close" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="panel-content">
+                <div class="panel-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v4M12 18v4M8 6h8M8 18h8" />
+                        <rect x="6" y="6" width="12" height="12" rx="2" />
+                        <path d="M12 8v4M10 10h4" />
+                    </svg>
+                    <p>No patrons yet</p>
+                    <p class="subtitle">Be the first to support this page</p>
+                    <a href="https://opencollective.com/inquiry-institute/contribute" target="_blank" rel="noopener noreferrer" class="panel-cta">
+                        Be the First Patron →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Feedback Candle -->
+    <div class="candle-container">
+        <button class="candle-btn" id="candle-btn" aria-label="Provide feedback">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="10" y="18" width="4" height="4" rx="1" />
+                <rect x="9" y="8" width="6" height="10" rx="1" />
+                <path d="M12 4v4M11 6h2" />
+                <circle cx="12" cy="6" r="1.5" fill="currentColor" />
+            </svg>
+        </button>
+        <div class="candle-panel" id="candle-panel">
+            <div class="panel-header">
+                <div>
+                    <h3>Feedback</h3>
+                    <p style="font-size: 12px; color: #64748b; margin-top: 4px; margin: 0;">Page: /grounds</p>
+                </div>
+                <button class="panel-close" id="candle-close" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="panel-content" style="flex: 1; overflow-y: auto;">
+                <div style="margin-bottom: 16px;">
+                    <h4 style="font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 12px;">Create New Issue</h4>
+                    <form id="feedback-form">
+                        <div class="form-group">
+                            <label class="form-label" for="issue-title">Title</label>
+                            <input type="text" id="issue-title" class="form-input" placeholder="Brief description of the issue or feedback" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="issue-body">Details (optional)</label>
+                            <textarea id="issue-body" class="form-textarea" placeholder="Additional details, steps to reproduce, or suggestions..." rows="4"></textarea>
+                        </div>
+                        <button type="submit" class="form-submit">Create Issue on GitHub</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="panel-backdrop" id="panel-backdrop"></div>
+    
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
     <script type="module" src="/src/main.js"></script>
+    <script>
+        // Lantern Panel Toggle
+        const lanternBtn = document.getElementById('lantern-btn');
+        const lanternPanel = document.getElementById('lantern-panel');
+        const lanternClose = document.getElementById('lantern-close');
+        const candleBtn = document.getElementById('candle-btn');
+        const candlePanel = document.getElementById('candle-panel');
+        const candleClose = document.getElementById('candle-close');
+        const backdrop = document.getElementById('panel-backdrop');
+        
+        function openLantern() {
+            lanternPanel.classList.add('open');
+            backdrop.classList.add('open');
+        }
+        
+        function closeLantern() {
+            lanternPanel.classList.remove('open');
+            backdrop.classList.remove('open');
+        }
+        
+        function openCandle() {
+            candlePanel.classList.add('open');
+            backdrop.classList.add('open');
+        }
+        
+        function closeCandle() {
+            candlePanel.classList.remove('open');
+            backdrop.classList.remove('open');
+        }
+        
+        lanternBtn.addEventListener('click', () => {
+            if (lanternPanel.classList.contains('open')) {
+                closeLantern();
+            } else {
+                closeCandle();
+                openLantern();
+            }
+        });
+        
+        lanternClose.addEventListener('click', closeLantern);
+        
+        candleBtn.addEventListener('click', () => {
+            if (candlePanel.classList.contains('open')) {
+                closeCandle();
+            } else {
+                closeLantern();
+                openCandle();
+            }
+        });
+        
+        candleClose.addEventListener('click', closeCandle);
+        
+        backdrop.addEventListener('click', () => {
+            closeLantern();
+            closeCandle();
+        });
+        
+        // Feedback Form
+        document.getElementById('feedback-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('issue-title').value;
+            const body = document.getElementById('issue-body').value;
+            const url = `https://github.com/InquiryInstitute/phaser/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body + '\n\n---\nPage: /grounds')}`;
+            window.open(url, '_blank');
+            document.getElementById('feedback-form').reset();
+            closeCandle();
+        });
+    </script>
 </body>
 </html>
