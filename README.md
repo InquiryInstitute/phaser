@@ -223,7 +223,7 @@ npm run deploy
 
 Then configure GitHub Pages custom domain:
 ```bash
-gh api repos/Inquiry-Institute/phaser/pages -X PUT -f cname='phaser.inquiry.institute'
+gh api repos/InquiryInstitute/phaser/pages -X PUT -f cname='phaser.inquiry.institute'
 ```
 
 ## Technology Stack

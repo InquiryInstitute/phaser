@@ -27,7 +27,7 @@ echo "📦 Repository name: $REPO_NAME"
 read -p "Enter the repository name (or press Enter to use '$REPO_NAME'): " CUSTOM_REPO_NAME
 REPO_NAME=${CUSTOM_REPO_NAME:-$REPO_NAME}
 
-ORG_NAME="Inquiry-Institute"
+ORG_NAME="InquiryInstitute"
 echo "🏢 Organization: $ORG_NAME"
 
 # Check if repository already exists
