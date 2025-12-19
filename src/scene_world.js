@@ -15,6 +15,19 @@ export default class WorldScene extends Phaser.Scene {
     // Load Tiled JSON map
     this.load.tilemapTiledJSON("campus", "/maps/campus.tmj");
     
+    // Add loading progress
+    this.load.on('progress', (value) => {
+      console.log('Loading progress:', Math.round(value * 100) + '%');
+    });
+    
+    this.load.on('complete', () => {
+      console.log('All assets loaded!');
+    });
+    
+    this.load.on('filecomplete', (key, type, data) => {
+      console.log('File loaded:', key, type);
+    });
+    
     // Create a simple colored rectangle for the player avatar
     // You can replace this with a sprite later
     this.load.image("player", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
@@ -72,20 +85,22 @@ export default class WorldScene extends Phaser.Scene {
     }
 
     // Create player avatar
-    const startX = map.widthInPixels / 2 || 64;
-    const startY = map.heightInPixels / 2 || 64;
+    const startX = map.widthInPixels / 2 || 480;
+    const startY = map.heightInPixels / 2 || 270;
     
     console.log("Creating player at:", startX, startY);
     console.log("Map dimensions:", map.widthInPixels, "x", map.heightInPixels);
+    console.log("Game dimensions:", this.cameras.main.width, "x", this.cameras.main.height);
     
     this.player = this.physics.add.sprite(startX, startY, "player");
-    this.player.setDisplaySize(18, 18);
+    this.player.setDisplaySize(24, 24);
     this.player.setTint(0x667eea); // Purple color for visibility
     this.player.setVisible(true);
-    this.player.body.setSize(18, 18);
+    this.player.body.setSize(24, 24);
     this.player.setCollideWorldBounds(true);
+    this.player.setDepth(10);
     
-    console.log("Player created:", this.player.x, this.player.y);
+    console.log("Player created:", this.player.x, this.player.y, "visible:", this.player.visible);
 
     // Camera follows player smoothly
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
