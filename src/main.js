@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+// Phaser is loaded via CDN in index.html
 import WorldScene from "./scene_world.js";
 
 new Phaser.Game({

@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+// Phaser is loaded via CDN in index.html
 import { config } from "./config.js";
 
 export default class WorldScene extends Phaser.Scene {
@@ -102,13 +102,16 @@ export default class WorldScene extends Phaser.Scene {
     
     console.log("Player created:", this.player.x, this.player.y, "visible:", this.player.visible);
 
-    // Camera follows player smoothly
-    this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
-    this.cameras.main.setZoom(2);
-    
-    // Set world bounds
+    // Set world bounds first
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    
+    // Camera follows player smoothly
+    this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+    this.cameras.main.setZoom(1.5);
+    this.cameras.main.setBackgroundColor(0xf5f5f5);
+    
+    console.log("Camera set up, following player");
 
     // Collide player with walls
     if (walls) {
