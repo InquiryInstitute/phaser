@@ -29,16 +29,20 @@ export default class WorldScene extends Phaser.Scene {
     
     if (!map) {
       console.error("Map 'campus' not loaded!");
+      // Create a simple fallback map
+      this.createFallbackMap();
       return;
     }
     
     console.log("Map loaded:", map.width, "x", map.height, "tiles");
+    console.log("Map pixels:", map.widthInPixels, "x", map.heightInPixels);
 
     // Match the tileset name in Tiled exactly
     const tileset = map.addTilesetImage("tiles", "tiles");
     
     if (!tileset) {
       console.error("Tileset not found! Make sure the tileset name in Tiled matches 'tiles'");
+      this.createFallbackMap();
       return;
     }
     
@@ -53,6 +57,9 @@ export default class WorldScene extends Phaser.Scene {
     } else {
       console.log("Ground layer created");
       ground.setVisible(true);
+      ground.setDepth(0);
+      // Make sure it's visible
+      this.cameras.main.setBackgroundColor(0xf5f5f5);
     }
 
     if (!walls) {
@@ -61,6 +68,7 @@ export default class WorldScene extends Phaser.Scene {
       console.log("Walls layer created");
       walls.setCollisionByExclusion([-1]);
       walls.setVisible(true);
+      walls.setDepth(1);
     }
 
     // Create player avatar
@@ -243,6 +251,16 @@ export default class WorldScene extends Phaser.Scene {
     }
 
     this.player.setVelocity(vx, vy);
+  }
+
+  createFallbackMap() {
+    // Create a simple colored background if map fails to load
+    this.add.rectangle(480, 270, 960, 540, 0xf5f5f5);
+    this.add.text(480, 270, "Map loading failed.\nCheck console for errors.", {
+      fontSize: "24px",
+      fill: "#333",
+      align: "center"
+    }).setOrigin(0.5);
   }
 
   openFacultyChat(faculty) {
