@@ -34,8 +34,39 @@ export default class WorldScene extends Phaser.Scene {
     // You can replace this with a sprite later
     this.load.image("player", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
     
-    // Create NPC sprite (simple colored circle)
+    // Create default NPC sprite (simple colored circle)
     this.load.image("npc", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
+    
+    // Preload faculty avatars from Supabase
+    this.preloadFacultyAvatars();
+  }
+  
+  async preloadFacultyAvatars() {
+    try {
+      const { config } = await import("./config.js");
+      const response = await fetch(
+        `${config.supabaseUrl}/rest/v1/faculty?select=id,slug,avatar_url&avatar_url=not.is.null&limit=50`,
+        {
+          headers: {
+            'apikey': config.supabaseAnonKey,
+            'Authorization': `Bearer ${config.supabaseAnonKey}`
+          }
+        }
+      );
+      
+      if (response.ok) {
+        const faculty = await response.json();
+        faculty.forEach(f => {
+          if (f.avatar_url && f.avatar_url.startsWith('data:')) {
+            const key = `avatar_${f.slug || f.id}`;
+            this.load.image(key, f.avatar_url);
+          }
+        });
+        console.log(`Preloading ${faculty.length} faculty avatars`);
+      }
+    } catch (error) {
+      console.warn("Could not preload faculty avatars:", error);
+    }
   }
 
   create() {
@@ -170,7 +201,12 @@ export default class WorldScene extends Phaser.Scene {
 
     // Load and spawn NPCs
     this.npcs = this.physics.add.staticGroup();
-    this.loadNPCs(map);
+    // Load NPCs asynchronously
+    this.loadNPCs(map).then(() => {
+      console.log("NPCs loaded");
+    }).catch(err => {
+      console.error("Error loading NPCs:", err);
+    });
 
     // Proximity detection for NPCs
     this.physics.add.overlap(this.player, this.npcs, (player, npc) => {
@@ -214,7 +250,7 @@ export default class WorldScene extends Phaser.Scene {
     this.interactionPrompt.setDepth(1000);
   }
 
-  loadNPCs(map) {
+  async loadNPCs(map) {
     const npcLayer = map.getObjectLayer("NPCs");
     
     if (!npcLayer || !npcLayer.objects) {
@@ -222,29 +258,99 @@ export default class WorldScene extends Phaser.Scene {
       return;
     }
 
-    npcLayer.objects.forEach(obj => {
-      // Create NPC sprite
-      const npc = this.npcs.create(obj.x, obj.y, "npc");
-      npc.setDisplaySize(20, 20);
-      npc.setTint(0x48bb78); // Green color for NPCs
-      npc.setOrigin(0.5, 1.0);
+    // Load faculty data from Supabase
+    const { config } = await import("./config.js");
+    let facultyData = {};
+    
+    try {
+      const response = await fetch(
+        `${config.supabaseUrl}/rest/v1/faculty?select=id,name,surname,slug,avatar_url,portrait_url&limit=100`,
+        {
+          headers: {
+            'apikey': config.supabaseAnonKey,
+            'Authorization': `Bearer ${config.supabaseAnonKey}`
+          }
+        }
+      );
+      
+      if (response.ok) {
+        const faculty = await response.json();
+        faculty.forEach(f => {
+          const slug = f.slug || f.id;
+          facultyData[slug] = f;
+          // Also index by personaId format
+          facultyData[`faculty.${slug}`] = f;
+        });
+        console.log(`Loaded ${faculty.length} faculty members from database`);
+      }
+    } catch (error) {
+      console.warn("Could not load faculty data:", error);
+    }
 
+    npcLayer.objects.forEach(async (obj) => {
       // Extract properties from Tiled object
       const getProperty = (name, defaultValue = null) => {
         const prop = obj.properties?.find(p => p.name === name);
         return prop ? prop.value : defaultValue;
       };
 
+      const personaId = getProperty("personaId", obj.name);
+      const displayName = getProperty("displayName", obj.name);
+      
+      // Look up faculty data
+      const faculty = facultyData[personaId] || facultyData[personaId.replace('faculty.', '')];
+      
+      // Determine avatar to use
+      let avatarKey = "npc"; // Default sprite
+      let avatarUrl = null;
+      
+      if (faculty) {
+        // Prefer avatar_url, fallback to portrait_url
+        avatarUrl = faculty.avatar_url || faculty.portrait_url;
+        if (avatarUrl) {
+          // If it's a data URL, create a texture from it
+          if (avatarUrl.startsWith('data:')) {
+            avatarKey = `avatar_${faculty.slug || faculty.id}`;
+            this.load.image(avatarKey, avatarUrl);
+            await new Promise(resolve => {
+              this.load.once('filecomplete-image-' + avatarKey, resolve);
+              this.load.start();
+            });
+          } else {
+            // External URL
+            avatarKey = `avatar_${faculty.slug || faculty.id}`;
+            this.load.image(avatarKey, avatarUrl);
+            await new Promise(resolve => {
+              this.load.once('filecomplete-image-' + avatarKey, resolve);
+              this.load.start();
+            });
+          }
+        }
+      }
+      
+      // Create NPC sprite
+      const npc = this.npcs.create(obj.x, obj.y, avatarKey);
+      npc.setDisplaySize(32, 32);
+      
+      // If no avatar, use colored circle
+      if (avatarKey === "npc") {
+        npc.setTint(this.generateColorFromName(displayName));
+      }
+      
+      npc.setOrigin(0.5, 1.0);
+      npc.setDepth(50);
+
       // Store faculty data on the NPC
       npc.faculty = {
-        id: getProperty("personaId", obj.name),
-        name: getProperty("displayName", obj.name),
+        id: personaId,
+        name: displayName,
         greeting: getProperty("greeting", "Hello."),
-        type: getProperty("type", "faculty")
+        type: getProperty("type", "faculty"),
+        facultyData: faculty || null
       };
 
       // Add name label above NPC
-      const nameLabel = this.add.text(obj.x, obj.y - 15, npc.faculty.name, {
+      const nameLabel = this.add.text(obj.x, obj.y - 20, displayName, {
         fontSize: "12px",
         fill: "#ffffff",
         fontFamily: "Arial",
@@ -253,7 +359,19 @@ export default class WorldScene extends Phaser.Scene {
       });
       nameLabel.setOrigin(0.5);
       nameLabel.setScrollFactor(1);
+      nameLabel.setDepth(100);
     });
+  }
+  
+  generateColorFromName(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    // Generate a nice color
+    const hue = Math.abs(hash % 360);
+    const color = Phaser.Display.Color.HSVToColor(hue / 360, 0.7, 0.8);
+    return color.color;
   }
 
   showInteractionPrompt(npc) {
