@@ -97,6 +97,17 @@ export default class WorldScene extends Phaser.Scene {
     }
     
     console.log("Tileset loaded:", tileset.name);
+    console.log("Tileset firstGID:", tileset.firstgid);
+    console.log("Tileset tileWidth:", tileset.tileWidth, "tileHeight:", tileset.tileHeight);
+    console.log("Tileset total tiles:", tileset.total);
+    
+    // Verify tileset image is loaded
+    if (this.textures.exists("tiles")) {
+      const texture = this.textures.get("tiles");
+      console.log("Tileset texture size:", texture.width, "x", texture.height);
+    } else {
+      console.error("Tileset texture 'tiles' not found!");
+    }
 
     // Create layers - ensure they render correctly
     const ground = map.createLayer("Ground", tileset, 0, 0);
@@ -105,9 +116,23 @@ export default class WorldScene extends Phaser.Scene {
     // Ensure layers are properly configured for rendering
     if (ground) {
       ground.setCullPadding(2, 2);
+      // Force tiles to render
+      ground.setAlpha(1);
+      ground.setVisible(true);
+      ground.setDepth(0);
+      // Refresh the layer
+      ground.render();
+      console.log("Ground layer tiles:", ground.layer.data.length);
+      console.log("Ground layer first tile:", ground.layer.data[0]?.index);
     }
     if (walls) {
       walls.setCullPadding(2, 2);
+      walls.setAlpha(1);
+      walls.setVisible(true);
+      walls.setDepth(1);
+      walls.render();
+      console.log("Walls layer tiles:", walls.layer.data.length);
+      console.log("Walls layer first tile:", walls.layer.data[0]?.index);
     }
 
     if (!ground) {
@@ -121,12 +146,22 @@ export default class WorldScene extends Phaser.Scene {
       ground.setAlpha(1);
       ground.setScrollFactor(1, 1);
       // Make sure it's visible
-      this.cameras.main.setBackgroundColor(0xf5f5f5);
+      this.cameras.main.setBackgroundColor(0x2a2a2a); // Darker background to see tiles
       console.log("Ground layer width/height:", ground.width, ground.height);
       console.log("Ground layer tile count:", ground.width * ground.height);
+      console.log("Ground layer tileWidth/tileHeight:", ground.tilemap.tileWidth, ground.tilemap.tileHeight);
+      
+      // Check if tileset is valid
+      console.log("Tileset tileWidth/tileHeight:", tileset.tileWidth, tileset.tileHeight);
       
       // Force a render update
       ground.setCullPadding(2, 2);
+      
+      // Debug: Check first few tiles
+      if (ground.layer && ground.layer.data) {
+        const sampleTiles = ground.layer.data.slice(0, 10);
+        console.log("Sample ground tiles:", sampleTiles.map(t => t ? t.index : 'empty'));
+      }
     }
 
     if (!walls) {
@@ -210,8 +245,8 @@ export default class WorldScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     
-    // Set camera background to light gray so we can see the map
-    this.cameras.main.setBackgroundColor(0xf5f5f5);
+    // Set camera background to dark gray so we can see tiles
+    this.cameras.main.setBackgroundColor(0x2a2a2a);
     
     // Set camera zoom first
     this.cameras.main.setZoom(1.5);
@@ -221,6 +256,9 @@ export default class WorldScene extends Phaser.Scene {
     
     // Camera follows player smoothly (after centering)
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+    
+    // Force camera to update immediately
+    this.cameras.main.update();
     
     console.log("Camera set up, following player");
     console.log("Camera position:", this.cameras.main.scrollX, this.cameras.main.scrollY);
