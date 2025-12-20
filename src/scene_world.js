@@ -81,27 +81,36 @@ export default class WorldScene extends Phaser.Scene {
       console.warn("Walls layer not found. Make sure you have a layer named 'Walls' in Tiled.");
     } else {
       console.log("Walls layer created");
-      // Set collision for wall tiles
-      // In our map data: 0 = empty, 1 = ground, 2 = walls
-      // Phaser uses the tile GID (Global ID) from the map
-      // Since firstgid=1, tile 2 in map = GID 2, which is tile index 1 in tileset
-      // But for collision, we use the GID directly
-      try {
-        // Set collision for tile GID 2 (walls in our map)
-        walls.setCollisionBetween(2, 2);
-        console.log("Collision set for GID 2 (walls)");
-      } catch (e) {
-        console.warn("setCollisionBetween failed, trying exclusion:", e);
-        // Fallback: Exclude empty (0) and ground (1)
-        try {
-          walls.setCollisionByExclusion([-1, 0, 1]);
-          console.log("Collision set using exclusion");
-        } catch (e2) {
-          console.error("Collision setup failed:", e2);
-        }
-      }
       walls.setVisible(true);
       walls.setDepth(1);
+      
+      // Set collision for wall tiles (GID 2)
+      // Try multiple methods to ensure collision works
+      let collisionSet = false;
+      
+      // Method 1: Set collision for specific tile GID
+      try {
+        walls.setCollisionBetween(2, 2);
+        collisionSet = true;
+        console.log("✓ Collision set using setCollisionBetween(2, 2)");
+      } catch (e) {
+        console.warn("setCollisionBetween failed:", e);
+      }
+      
+      // Method 2: If that didn't work, try exclusion
+      if (!collisionSet) {
+        try {
+          walls.setCollisionByExclusion([-1, 0, 1]);
+          collisionSet = true;
+          console.log("✓ Collision set using exclusion");
+        } catch (e) {
+          console.warn("setCollisionByExclusion failed:", e);
+        }
+      }
+      
+      if (!collisionSet) {
+        console.warn("⚠ Could not set collisions - walls will not block player");
+      }
     }
 
     // Create player avatar
