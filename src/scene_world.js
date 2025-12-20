@@ -105,6 +105,7 @@ export default class WorldScene extends Phaser.Scene {
     if (this.textures.exists("tiles")) {
       const texture = this.textures.get("tiles");
       console.log("Tileset texture size:", texture.width, "x", texture.height);
+      console.log("Tileset texture key exists:", this.textures.exists("tiles"));
     } else {
       console.error("Tileset texture 'tiles' not found!");
     }
@@ -113,26 +114,69 @@ export default class WorldScene extends Phaser.Scene {
     const ground = map.createLayer("Ground", tileset, 0, 0);
     const walls = map.createLayer("Walls", tileset, 0, 0);
     
-    // Ensure layers are properly configured for rendering
+    // Debug layer structure
     if (ground) {
+      console.log("Ground layer created");
+      console.log("Ground layer tileWidth:", ground.tilemap.tileWidth, "tileHeight:", ground.tilemap.tileHeight);
+      console.log("Ground layer width (tiles):", ground.width, "height (tiles):", ground.height);
+      console.log("Ground layer width (px):", ground.width * ground.tilemap.tileWidth, "height (px):", ground.height * ground.tilemap.tileHeight);
+      
+      // Check layer data
+      if (ground.layer && ground.layer.data) {
+        const dataArray = ground.layer.data;
+        console.log("Ground layer data length:", dataArray.length);
+        console.log("Ground layer data[0]:", dataArray[0] ? {
+          index: dataArray[0].index,
+          x: dataArray[0].x,
+          y: dataArray[0].y
+        } : "null");
+        
+        // Find first non-empty tile
+        for (let i = 0; i < Math.min(100, dataArray.length); i++) {
+          if (dataArray[i] && dataArray[i].index !== 0) {
+            console.log(`First non-empty ground tile at index ${i}:`, {
+              index: dataArray[i].index,
+              x: dataArray[i].x,
+              y: dataArray[i].y
+            });
+            break;
+          }
+        }
+      }
+      
       ground.setCullPadding(2, 2);
-      // Force tiles to render
       ground.setAlpha(1);
       ground.setVisible(true);
       ground.setDepth(0);
-      // Refresh the layer
-      ground.render();
-      console.log("Ground layer tiles:", ground.layer.data.length);
-      console.log("Ground layer first tile:", ground.layer.data[0]?.index);
+      ground.setScrollFactor(1, 1);
     }
+    
     if (walls) {
+      console.log("Walls layer created");
+      console.log("Walls layer width (tiles):", walls.width, "height (tiles):", walls.height);
+      
+      if (walls.layer && walls.layer.data) {
+        const dataArray = walls.layer.data;
+        console.log("Walls layer data length:", dataArray.length);
+        
+        // Find first non-empty tile
+        for (let i = 0; i < Math.min(100, dataArray.length); i++) {
+          if (dataArray[i] && dataArray[i].index !== 0) {
+            console.log(`First non-empty wall tile at index ${i}:`, {
+              index: dataArray[i].index,
+              x: dataArray[i].x,
+              y: dataArray[i].y
+            });
+            break;
+          }
+        }
+      }
+      
       walls.setCullPadding(2, 2);
       walls.setAlpha(1);
       walls.setVisible(true);
       walls.setDepth(1);
-      walls.render();
-      console.log("Walls layer tiles:", walls.layer.data.length);
-      console.log("Walls layer first tile:", walls.layer.data[0]?.index);
+      walls.setScrollFactor(1, 1);
     }
 
     if (!ground) {
@@ -140,28 +184,8 @@ export default class WorldScene extends Phaser.Scene {
       // Create a fallback background
       this.add.rectangle(480, 270, 960, 540, 0xf5f5f5);
     } else {
-      console.log("Ground layer created");
-      ground.setVisible(true);
-      ground.setDepth(0);
-      ground.setAlpha(1);
-      ground.setScrollFactor(1, 1);
-      // Make sure it's visible
+      // Layer already configured above
       this.cameras.main.setBackgroundColor(0x2a2a2a); // Darker background to see tiles
-      console.log("Ground layer width/height:", ground.width, ground.height);
-      console.log("Ground layer tile count:", ground.width * ground.height);
-      console.log("Ground layer tileWidth/tileHeight:", ground.tilemap.tileWidth, ground.tilemap.tileHeight);
-      
-      // Check if tileset is valid
-      console.log("Tileset tileWidth/tileHeight:", tileset.tileWidth, tileset.tileHeight);
-      
-      // Force a render update
-      ground.setCullPadding(2, 2);
-      
-      // Debug: Check first few tiles
-      if (ground.layer && ground.layer.data) {
-        const sampleTiles = ground.layer.data.slice(0, 10);
-        console.log("Sample ground tiles:", sampleTiles.map(t => t ? t.index : 'empty'));
-      }
     }
 
     if (!walls) {
