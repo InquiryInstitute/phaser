@@ -44,8 +44,9 @@ export default class WorldScene extends Phaser.Scene {
   async preloadFacultyAvatars() {
     try {
       const { config } = await import("./config.js");
+      // Fetch all faculty and filter client-side (Supabase filter syntax is complex)
       const response = await fetch(
-        `${config.supabaseUrl}/rest/v1/faculty?select=id,slug,avatar_url&avatar_url=not.is.null&limit=50`,
+        `${config.supabaseUrl}/rest/v1/faculty?select=id,slug,avatar_url&limit=50`,
         {
           headers: {
             'apikey': config.supabaseAnonKey,
@@ -56,13 +57,16 @@ export default class WorldScene extends Phaser.Scene {
       
       if (response.ok) {
         const faculty = await response.json();
-        faculty.forEach(f => {
+        const withAvatars = faculty.filter(f => f.avatar_url);
+        withAvatars.forEach(f => {
           if (f.avatar_url && f.avatar_url.startsWith('data:')) {
             const key = `avatar_${f.slug || f.id}`;
             this.load.image(key, f.avatar_url);
           }
         });
-        console.log(`Preloading ${faculty.length} faculty avatars`);
+        console.log(`Preloading ${withAvatars.length} faculty avatars`);
+      } else {
+        console.warn("Could not fetch faculty for avatar preload:", response.status);
       }
     } catch (error) {
       console.warn("Could not preload faculty avatars:", error);
@@ -367,11 +371,17 @@ export default class WorldScene extends Phaser.Scene {
       
       // Create NPC sprite
       const npc = this.npcs.create(obj.x, obj.y, avatarKey);
+      if (!npc) {
+        console.warn(`Failed to create NPC at ${obj.x}, ${obj.y}`);
+        continue;
+      }
+      
       npc.setDisplaySize(32, 32);
       
       // If no avatar, use colored circle based on name
       if (avatarKey === "npc") {
-        npc.setTint(this.generateColorFromName(displayName));
+        const color = this.generateColorFromName(displayName || "NPC");
+        npc.setTint(color);
       }
       
       npc.setOrigin(0.5, 1.0);
@@ -379,15 +389,16 @@ export default class WorldScene extends Phaser.Scene {
 
       // Store faculty data on the NPC
       npc.faculty = {
-        id: personaId,
-        name: displayName,
+        id: personaId || obj.name,
+        name: displayName || obj.name || "Unknown",
         greeting: getProperty("greeting", "Hello."),
         type: getProperty("type", "faculty"),
         facultyData: faculty || null
       };
 
       // Add name label above NPC
-      const nameLabel = this.add.text(obj.x, obj.y - 20, displayName, {
+      const nameText = displayName || obj.name || "NPC";
+      const nameLabel = this.add.text(obj.x, obj.y - 20, nameText, {
         fontSize: "12px",
         fill: "#ffffff",
         fontFamily: "Arial",
@@ -407,10 +418,43 @@ export default class WorldScene extends Phaser.Scene {
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
-    // Generate a nice color using HSV
+    // Generate a nice color using HSL
     const hue = Math.abs(hash % 360);
-    const color = Phaser.Display.Color.HSVToColor(hue / 360, 0.7, 0.8);
-    return color.color;
+    const saturation = 70;
+    const lightness = 50;
+    
+    // Convert HSL to RGB manually
+    const h = hue / 360;
+    const s = saturation / 100;
+    const l = lightness / 100;
+    
+    let r, g, b;
+    if (s === 0) {
+      r = g = b = l; // achromatic
+    } else {
+      const hue2rgb = (p, q, t) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+      
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+    
+    // Convert to Phaser color integer
+    const colorInt = Phaser.Display.Color.GetColor(
+      Math.round(r * 255),
+      Math.round(g * 255),
+      Math.round(b * 255)
+    );
+    return colorInt;
   }
 
   showInteractionPrompt(npc) {
