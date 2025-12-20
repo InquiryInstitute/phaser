@@ -107,9 +107,11 @@ export default class WorldScene extends Phaser.Scene {
       ground.setVisible(true);
       ground.setDepth(0);
       ground.setAlpha(1);
+      ground.setScrollFactor(1, 1);
       // Make sure it's visible
       this.cameras.main.setBackgroundColor(0xf5f5f5);
-      console.log("Ground layer tile count:", ground.layer.data.length);
+      console.log("Ground layer tile count:", ground.layer ? ground.layer.data.length : "N/A");
+      console.log("Ground layer width/height:", ground.width, ground.height);
     }
 
     if (!walls) {
@@ -164,15 +166,23 @@ export default class WorldScene extends Phaser.Scene {
     this.player.setTint(0x667eea); // Purple color for visibility
     this.player.setVisible(true);
     this.player.setAlpha(1);
-    this.player.body.setSize(24, 24);
-    this.player.setCollideWorldBounds(true);
+    
+    // Set physics body
+    if (this.player.body) {
+      this.player.body.setSize(24, 24);
+      this.player.body.setCollideWorldBounds(true);
+      this.player.body.setImmovable(false);
+    }
+    
     this.player.setDepth(100); // High depth to be on top
     
     // Add a visible circle behind player for debugging
     const playerBg = this.add.circle(startX, startY, 14, 0xffffff, 0.5);
     playerBg.setDepth(99);
+    playerBg.setScrollFactor(1, 1);
     
     console.log("Player created:", this.player.x, this.player.y, "visible:", this.player.visible);
+    console.log("Player body:", this.player.body ? "exists" : "missing");
     console.log("Ground layer visible:", ground ? ground.visible : "N/A");
     console.log("Walls layer visible:", walls ? walls.visible : "N/A");
 
@@ -183,16 +193,19 @@ export default class WorldScene extends Phaser.Scene {
     // Set camera background to light gray so we can see the map
     this.cameras.main.setBackgroundColor(0xf5f5f5);
     
-    // Camera follows player smoothly
-    this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+    // Set camera zoom first
     this.cameras.main.setZoom(1.5);
     
-    // Center camera on player initially
+    // Center camera on player initially (before following)
     this.cameras.main.centerOn(startX, startY);
+    
+    // Camera follows player smoothly (after centering)
+    this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
     
     console.log("Camera set up, following player");
     console.log("Camera position:", this.cameras.main.scrollX, this.cameras.main.scrollY);
     console.log("Camera zoom:", this.cameras.main.zoom);
+    console.log("Player position:", this.player.x, this.player.y);
 
     // Collide player with walls
     if (walls) {
@@ -287,7 +300,8 @@ export default class WorldScene extends Phaser.Scene {
       console.warn("Could not load faculty data:", error);
     }
 
-    npcLayer.objects.forEach(async (obj) => {
+    // Process NPCs synchronously to avoid race conditions
+    for (const obj of npcLayer.objects) {
       // Extract properties from Tiled object
       const getProperty = (name, defaultValue = null) => {
         const prop = obj.properties?.find(p => p.name === name);
@@ -298,33 +312,29 @@ export default class WorldScene extends Phaser.Scene {
       const displayName = getProperty("displayName", obj.name);
       
       // Look up faculty data
-      const faculty = facultyData[personaId] || facultyData[personaId.replace('faculty.', '')];
+      const faculty = facultyData[personaId] || facultyData[personaId?.replace('faculty.', '')];
       
       // Determine avatar to use
       let avatarKey = "npc"; // Default sprite
-      let avatarUrl = null;
       
-      if (faculty) {
-        // Prefer avatar_url, fallback to portrait_url
-        avatarUrl = faculty.avatar_url || faculty.portrait_url;
-        if (avatarUrl) {
-          // If it's a data URL, create a texture from it
+      if (faculty && (faculty.avatar_url || faculty.portrait_url)) {
+        const avatarUrl = faculty.avatar_url || faculty.portrait_url;
+        avatarKey = `avatar_${faculty.slug || faculty.id}`;
+        
+        // Check if already loaded, if not load it
+        if (!this.textures.exists(avatarKey)) {
           if (avatarUrl.startsWith('data:')) {
-            avatarKey = `avatar_${faculty.slug || faculty.id}`;
+            // Data URL - load directly
             this.load.image(avatarKey, avatarUrl);
-            await new Promise(resolve => {
-              this.load.once('filecomplete-image-' + avatarKey, resolve);
-              this.load.start();
-            });
           } else {
             // External URL
-            avatarKey = `avatar_${faculty.slug || faculty.id}`;
             this.load.image(avatarKey, avatarUrl);
-            await new Promise(resolve => {
-              this.load.once('filecomplete-image-' + avatarKey, resolve);
-              this.load.start();
-            });
           }
+          // Wait for load to complete
+          await new Promise((resolve) => {
+            this.load.once(`filecomplete-image-${avatarKey}`, resolve);
+            this.load.start();
+          });
         }
       }
       
@@ -332,7 +342,7 @@ export default class WorldScene extends Phaser.Scene {
       const npc = this.npcs.create(obj.x, obj.y, avatarKey);
       npc.setDisplaySize(32, 32);
       
-      // If no avatar, use colored circle
+      // If no avatar, use colored circle based on name
       if (avatarKey === "npc") {
         npc.setTint(this.generateColorFromName(displayName));
       }
@@ -360,7 +370,9 @@ export default class WorldScene extends Phaser.Scene {
       nameLabel.setOrigin(0.5);
       nameLabel.setScrollFactor(1);
       nameLabel.setDepth(100);
-    });
+    }
+    
+    console.log(`Created ${npcLayer.objects.length} NPCs`);
   }
   
   generateColorFromName(name) {
@@ -368,7 +380,7 @@ export default class WorldScene extends Phaser.Scene {
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
-    // Generate a nice color
+    // Generate a nice color using HSV
     const hue = Math.abs(hash % 360);
     const color = Phaser.Display.Color.HSVToColor(hue / 360, 0.7, 0.8);
     return color.color;
@@ -416,12 +428,16 @@ export default class WorldScene extends Phaser.Scene {
       this.openFacultyChat(this.nearNPC.faculty);
     }
 
-    // Movement
+    // Movement - only if player exists and physics is enabled
+    if (!this.player || !this.player.body) {
+      return;
+    }
+    
     const speed = 110;
-    const left = this.cursors.left.isDown || this.keys.A.isDown;
-    const right = this.cursors.right.isDown || this.keys.D.isDown;
-    const up = this.cursors.up.isDown || this.keys.W.isDown;
-    const down = this.cursors.down.isDown || this.keys.S.isDown;
+    const left = this.cursors.left.isDown || (this.keys && this.keys.A && this.keys.A.isDown);
+    const right = this.cursors.right.isDown || (this.keys && this.keys.D && this.keys.D.isDown);
+    const up = this.cursors.up.isDown || (this.keys && this.keys.W && this.keys.W.isDown);
+    const down = this.cursors.down.isDown || (this.keys && this.keys.S && this.keys.S.isDown);
 
     let vx = 0, vy = 0;
     if (left) vx -= speed;
@@ -437,6 +453,13 @@ export default class WorldScene extends Phaser.Scene {
     }
 
     this.player.setVelocity(vx, vy);
+    
+    // Debug: log movement occasionally
+    if (vx !== 0 || vy !== 0) {
+      if (Math.random() < 0.01) { // Log 1% of the time
+        console.log("Player moving:", vx, vy, "at", this.player.x, this.player.y);
+      }
+    }
   }
 
   createFallbackMap() {
