@@ -69,12 +69,16 @@ export default class WorldScene extends Phaser.Scene {
 
     if (!ground) {
       console.warn("Ground layer not found. Make sure you have a layer named 'Ground' in Tiled.");
+      // Create a fallback background
+      this.add.rectangle(480, 270, 960, 540, 0xf5f5f5);
     } else {
       console.log("Ground layer created");
       ground.setVisible(true);
       ground.setDepth(0);
+      ground.setAlpha(1);
       // Make sure it's visible
       this.cameras.main.setBackgroundColor(0xf5f5f5);
+      console.log("Ground layer tile count:", ground.layer.data.length);
     }
 
     if (!walls) {
@@ -83,6 +87,8 @@ export default class WorldScene extends Phaser.Scene {
       console.log("Walls layer created");
       walls.setVisible(true);
       walls.setDepth(1);
+      walls.setAlpha(1);
+      console.log("Walls layer tile count:", walls.layer.data.length);
       
       // Set collision for wall tiles (GID 2)
       // Try multiple methods to ensure collision works
