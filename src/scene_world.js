@@ -98,13 +98,15 @@ export default class WorldScene extends Phaser.Scene {
     const ground = map.createLayer("Ground", tileset, 0, 0);
     const walls = map.createLayer("Walls", tileset, 0, 0);
     
-    // Force layer refresh
+    // Ensure layers are properly configured for rendering
     if (ground) {
-      ground.setCullPadding(1, 1);
+      ground.setCullPadding(2, 2);
       ground.setRenderOrder(Phaser.Tilemaps.CONST.RENDER_ORDER.LEFT_TO_RIGHT);
+      // Make sure tiles are actually rendered
+      ground.setTileSizeCallback(() => {}, this);
     }
     if (walls) {
-      walls.setCullPadding(1, 1);
+      walls.setCullPadding(2, 2);
       walls.setRenderOrder(Phaser.Tilemaps.CONST.RENDER_ORDER.LEFT_TO_RIGHT);
     }
 
@@ -120,8 +122,11 @@ export default class WorldScene extends Phaser.Scene {
       ground.setScrollFactor(1, 1);
       // Make sure it's visible
       this.cameras.main.setBackgroundColor(0xf5f5f5);
-      console.log("Ground layer tile count:", ground.layer ? ground.layer.data.length : "N/A");
       console.log("Ground layer width/height:", ground.width, ground.height);
+      console.log("Ground layer tile count:", ground.width * ground.height);
+      
+      // Force a render update
+      ground.setCullPadding(2, 2);
     }
 
     if (!walls) {
@@ -131,7 +136,12 @@ export default class WorldScene extends Phaser.Scene {
       walls.setVisible(true);
       walls.setDepth(1);
       walls.setAlpha(1);
-      console.log("Walls layer tile count:", walls.layer.data.length);
+      walls.setScrollFactor(1, 1);
+      console.log("Walls layer width/height:", walls.width, walls.height);
+      console.log("Walls layer tile count:", walls.width * walls.height);
+      
+      // Force a render update
+      walls.setCullPadding(2, 2);
       
       // Set collision for wall tiles (GID 2)
       // Try multiple methods to ensure collision works
