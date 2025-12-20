@@ -113,9 +113,9 @@ export default class WorldScene extends Phaser.Scene {
       }
     }
 
-    // Create player avatar
-    const startX = map.widthInPixels / 2 || 480;
-    const startY = map.heightInPixels / 2 || 270;
+    // Create player avatar - start in center of map
+    const startX = map.widthInPixels / 2;
+    const startY = map.heightInPixels / 2;
     
     console.log("Creating player at:", startX, startY);
     console.log("Map dimensions:", map.widthInPixels, "x", map.heightInPixels);
@@ -125,22 +125,36 @@ export default class WorldScene extends Phaser.Scene {
     this.player.setDisplaySize(24, 24);
     this.player.setTint(0x667eea); // Purple color for visibility
     this.player.setVisible(true);
+    this.player.setAlpha(1);
     this.player.body.setSize(24, 24);
     this.player.setCollideWorldBounds(true);
-    this.player.setDepth(10);
+    this.player.setDepth(100); // High depth to be on top
+    
+    // Add a visible circle behind player for debugging
+    const playerBg = this.add.circle(startX, startY, 14, 0xffffff, 0.5);
+    playerBg.setDepth(99);
     
     console.log("Player created:", this.player.x, this.player.y, "visible:", this.player.visible);
+    console.log("Ground layer visible:", ground ? ground.visible : "N/A");
+    console.log("Walls layer visible:", walls ? walls.visible : "N/A");
 
     // Set world bounds first
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     
+    // Set camera background to light gray so we can see the map
+    this.cameras.main.setBackgroundColor(0xf5f5f5);
+    
     // Camera follows player smoothly
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
     this.cameras.main.setZoom(1.5);
-    this.cameras.main.setBackgroundColor(0xf5f5f5);
+    
+    // Center camera on player initially
+    this.cameras.main.centerOn(startX, startY);
     
     console.log("Camera set up, following player");
+    console.log("Camera position:", this.cameras.main.scrollX, this.cameras.main.scrollY);
+    console.log("Camera zoom:", this.cameras.main.zoom);
 
     // Collide player with walls
     if (walls) {
