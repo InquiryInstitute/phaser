@@ -101,13 +101,9 @@ export default class WorldScene extends Phaser.Scene {
     // Ensure layers are properly configured for rendering
     if (ground) {
       ground.setCullPadding(2, 2);
-      ground.setRenderOrder(Phaser.Tilemaps.CONST.RENDER_ORDER.LEFT_TO_RIGHT);
-      // Make sure tiles are actually rendered
-      ground.setTileSizeCallback(() => {}, this);
     }
     if (walls) {
       walls.setCullPadding(2, 2);
-      walls.setRenderOrder(Phaser.Tilemaps.CONST.RENDER_ORDER.LEFT_TO_RIGHT);
     }
 
     if (!ground) {
