@@ -94,9 +94,19 @@ export default class WorldScene extends Phaser.Scene {
     
     console.log("Tileset loaded:", tileset.name);
 
-    // Create layers
+    // Create layers - ensure they render correctly
     const ground = map.createLayer("Ground", tileset, 0, 0);
     const walls = map.createLayer("Walls", tileset, 0, 0);
+    
+    // Force layer refresh
+    if (ground) {
+      ground.setCullPadding(1, 1);
+      ground.setRenderOrder(Phaser.Tilemaps.CONST.RENDER_ORDER.LEFT_TO_RIGHT);
+    }
+    if (walls) {
+      walls.setCullPadding(1, 1);
+      walls.setRenderOrder(Phaser.Tilemaps.CONST.RENDER_ORDER.LEFT_TO_RIGHT);
+    }
 
     if (!ground) {
       console.warn("Ground layer not found. Make sure you have a layer named 'Ground' in Tiled.");
