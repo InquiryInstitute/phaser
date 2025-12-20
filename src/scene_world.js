@@ -114,8 +114,9 @@ export default class WorldScene extends Phaser.Scene {
     }
 
     // Create player avatar - start in center of map
-    const startX = map.widthInPixels / 2;
-    const startY = map.heightInPixels / 2;
+    // Make sure we have valid coordinates
+    const startX = Math.max(64, Math.min(map.widthInPixels - 64, map.widthInPixels / 2));
+    const startY = Math.max(64, Math.min(map.heightInPixels - 64, map.heightInPixels / 2));
     
     console.log("Creating player at:", startX, startY);
     console.log("Map dimensions:", map.widthInPixels, "x", map.heightInPixels);
