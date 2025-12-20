@@ -82,26 +82,22 @@ export default class WorldScene extends Phaser.Scene {
     } else {
       console.log("Walls layer created");
       // Set collision for wall tiles
-      // In our map: 0 = empty, 1 = ground, 2 = walls
-      // Phaser uses tile indices from the map data directly
-      // Set collision for all tiles except empty (-1) and ground (1)
+      // In our map data: 0 = empty, 1 = ground, 2 = walls
+      // Phaser uses the tile GID (Global ID) from the map
+      // Since firstgid=1, tile 2 in map = GID 2, which is tile index 1 in tileset
+      // But for collision, we use the GID directly
       try {
-        // Method 1: Set collision for specific tile index (2 = walls)
+        // Set collision for tile GID 2 (walls in our map)
         walls.setCollisionBetween(2, 2);
-        console.log("Collision set for tile index 2 (walls)");
+        console.log("Collision set for GID 2 (walls)");
       } catch (e) {
-        console.warn("setCollisionBetween failed:", e);
-        // Method 2: Exclude empty and ground, collide with everything else
+        console.warn("setCollisionBetween failed, trying exclusion:", e);
+        // Fallback: Exclude empty (0) and ground (1)
         try {
-          // Exclude: -1 (empty), 0 (empty), 1 (ground)
-          // This means tiles 2+ will collide
-          const excludeArray = [-1, 0, 1];
-          walls.setCollisionByExclusion(excludeArray);
-          console.log("Collision set using exclusion:", excludeArray);
+          walls.setCollisionByExclusion([-1, 0, 1]);
+          console.log("Collision set using exclusion");
         } catch (e2) {
-          console.error("setCollisionByExclusion failed:", e2);
-          // If all else fails, just set collision for all non-empty tiles
-          console.warn("Using fallback: setting collision for all non-empty tiles");
+          console.error("Collision setup failed:", e2);
         }
       }
       walls.setVisible(true);
