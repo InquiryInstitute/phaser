@@ -10,10 +10,11 @@ export default class WorldScene extends Phaser.Scene {
 
   preload() {
     // Load tileset image explicitly (adjust path if needed)
-    this.load.image("tiles", "/maps/tiles.png");
+    // Use relative path for GitHub Pages compatibility
+    this.load.image("tiles", "./maps/tiles.png");
     
     // Load Tiled JSON map
-    this.load.tilemapTiledJSON("campus", "/maps/campus.tmj");
+    this.load.tilemapTiledJSON("campus", "./maps/campus.tmj");
     
     // Add loading progress
     this.load.on('progress', (value) => {
@@ -219,7 +220,7 @@ export default class WorldScene extends Phaser.Scene {
 
   update() {
     // Check distance to NPCs (fallback if overlap doesn't work perfectly)
-    if (this.npcs.children.entries.length > 0) {
+    if (this.npcs && this.npcs.children && this.npcs.children.entries && this.npcs.children.entries.length > 0) {
       let closestNPC = null;
       let closestDistance = Infinity;
 
