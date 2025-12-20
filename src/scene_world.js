@@ -9,12 +9,13 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   preload() {
-    // Load tileset image explicitly (adjust path if needed)
-    // Use relative path for GitHub Pages compatibility
-    this.load.image("tiles", "./maps/tiles.png");
+    // Load tileset image explicitly
+    // Try multiple path formats for compatibility
+    const basePath = window.location.pathname.replace(/\/$/, '') || '.';
+    this.load.image("tiles", `${basePath}/maps/tiles.png`);
     
     // Load Tiled JSON map
-    this.load.tilemapTiledJSON("campus", "./maps/campus.tmj");
+    this.load.tilemapTiledJSON("campus", `${basePath}/maps/campus.tmj`);
     
     // Add loading progress
     this.load.on('progress', (value) => {
@@ -245,7 +246,7 @@ export default class WorldScene extends Phaser.Scene {
     }
 
     // Handle E key press to open chat
-    if (Phaser.Input.Keyboard.JustDown(this.keyE) && this.nearNPC && !this.chatOpen) {
+    if (this.keyE && Phaser.Input.Keyboard.JustDown(this.keyE) && this.nearNPC && !this.chatOpen) {
       this.openFacultyChat(this.nearNPC.faculty);
     }
 
