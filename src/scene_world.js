@@ -81,15 +81,28 @@ export default class WorldScene extends Phaser.Scene {
       console.warn("Walls layer not found. Make sure you have a layer named 'Walls' in Tiled.");
     } else {
       console.log("Walls layer created");
-      // Set collision for all non-empty tiles (tile index 0 is empty)
-      walls.setCollisionByProperty({ collides: true });
-      // Fallback: if property-based collision doesn't work, use exclusion
+      // Set collision for wall tiles
+      // In our map: 0 = empty, 1 = ground, 2 = walls
+      // Phaser uses tile indices from the map data directly
+      // Set collision for all tiles except empty (-1) and ground (1)
       try {
-        walls.setCollisionByExclusion([-1, 0]);
+        // Method 1: Set collision for specific tile index (2 = walls)
+        walls.setCollisionBetween(2, 2);
+        console.log("Collision set for tile index 2 (walls)");
       } catch (e) {
-        console.warn("Collision setup warning:", e);
-        // Alternative: set collision for specific tile indices
-        walls.setCollisionBetween(2, 2); // Tile index 2 is walls
+        console.warn("setCollisionBetween failed:", e);
+        // Method 2: Exclude empty and ground, collide with everything else
+        try {
+          // Exclude: -1 (empty), 0 (empty), 1 (ground)
+          // This means tiles 2+ will collide
+          const excludeArray = [-1, 0, 1];
+          walls.setCollisionByExclusion(excludeArray);
+          console.log("Collision set using exclusion:", excludeArray);
+        } catch (e2) {
+          console.error("setCollisionByExclusion failed:", e2);
+          // If all else fails, just set collision for all non-empty tiles
+          console.warn("Using fallback: setting collision for all non-empty tiles");
+        }
       }
       walls.setVisible(true);
       walls.setDepth(1);
