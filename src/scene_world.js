@@ -81,7 +81,16 @@ export default class WorldScene extends Phaser.Scene {
       console.warn("Walls layer not found. Make sure you have a layer named 'Walls' in Tiled.");
     } else {
       console.log("Walls layer created");
-      walls.setCollisionByExclusion([-1]);
+      // Set collision for all non-empty tiles (tile index 0 is empty)
+      walls.setCollisionByProperty({ collides: true });
+      // Fallback: if property-based collision doesn't work, use exclusion
+      try {
+        walls.setCollisionByExclusion([-1, 0]);
+      } catch (e) {
+        console.warn("Collision setup warning:", e);
+        // Alternative: set collision for specific tile indices
+        walls.setCollisionBetween(2, 2); // Tile index 2 is walls
+      }
       walls.setVisible(true);
       walls.setDepth(1);
     }
