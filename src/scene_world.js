@@ -266,8 +266,19 @@ export default class WorldScene extends Phaser.Scene {
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
     this.keyE = this.input.keyboard.addKey("E");
     
+    // Test input
+    this.input.keyboard.on('keydown', (event) => {
+      console.log('Key pressed:', event.key);
+    });
+    
     // Prevent context menu on right click
     this.input.mouse.disableContextMenu();
+    
+    // Add a test rectangle to verify rendering works
+    const testRect = this.add.rectangle(startX, startY - 50, 100, 20, 0xff0000, 0.5);
+    testRect.setScrollFactor(1, 1);
+    testRect.setDepth(200);
+    console.log("Test rectangle added at:", startX, startY - 50);
 
     // Interaction prompt text (hidden initially)
     this.interactionPrompt = this.add.text(0, 0, "Press E to talk", {
